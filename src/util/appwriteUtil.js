@@ -16,14 +16,15 @@ export const updateSearchCount = async (searchTerm, movie) => {
     });
 
     // * 2. If found increase the count of the search movie
-    if (result.rows.length > 0) {
-      const doc = result.rows[0];
-        console.log(doc)
+
+
+    if (result.total > 0) {
+        const doc = result.rows[0];
       await tableDB.updateRow({
         databaseId,
         tableId,
         rowId: doc.$id,
-        data: { count: data.count + 1 },
+        data: { count: doc.count + 1 },
       });
     }
     // * 3. If not add the current search term into the database and set count to 1
@@ -48,7 +49,6 @@ export const updateSearchCount = async (searchTerm, movie) => {
 export const getTrendingMovies = async() => {
     try {
         const result = await tableDB.listRows({databaseId, tableId, queries: [Query.limit(5), Query.orderDesc("count")]});
-        console.log(result)
         return result.rows;
     } catch (error) {
         

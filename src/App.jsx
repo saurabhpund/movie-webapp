@@ -29,10 +29,10 @@ function App() {
 
   useDebounce(() => setDebouncedSearchTerm(searchTerm), 1000, [searchTerm]);
 
-  const loadTrendingMovies =  async() => {
-      const movies = await getTrendingMovies();
-      setTrendingMovies(movies);
-  }
+  const loadTrendingMovies = async () => {
+    const movies = await getTrendingMovies();
+    setTrendingMovies(movies);
+  };
 
   const fetchData = async (query = "") => {
     try {
@@ -68,7 +68,7 @@ function App() {
 
   useEffect(() => {
     loadTrendingMovies();
-  }, [])
+  }, []);
 
   return (
     <>
@@ -84,8 +84,24 @@ function App() {
             <Search seachTerm={searchTerm} setSearchTerm={setSearchTerm} />
           </header>
 
+          {trendingMovies.length > 0 && (
+            <section className="trending">
+              <h2>Trending Movies</h2>
+              <ul>
+                {trendingMovies.map((movie, i) => {
+                  return (
+                    <li key={i}>
+                      <p>{i + 1}</p>
+                      <img src={movie.poster_url} alt={movie.title} />
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          )}
+
           <section className="all-movies">
-            <h2 className="mt-[40px]">All Movies</h2>
+            <h2 className="mt-10">All Movies</h2>
 
             {loading ? (
               <Spinner />
