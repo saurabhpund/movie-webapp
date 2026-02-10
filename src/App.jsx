@@ -5,11 +5,11 @@ import Search from "./components/Search";
 import Spinner from "./components/Spinner";
 import MovieCards from "./components/MovieCards";
 import { useDebounce } from "react-use";
+import { getTrendingMovies, updateSearchCount } from "./util/appwriteUtil";
 
 const API_BASE_URL = "https://api.themoviedb.org/3";
 
-const API_KEY =
-  "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI1MjNmMDcyMDlkNWI4NDJjYWYwY2I3ZDJhMzdlMjE3OCIsIm5iZiI6MTc3MDU1NjI3MC4yNjMsInN1YiI6IjY5ODg4YjZlMzNmOGZlYTFhODVjYWEwYSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.oZbUYzxph-PErPlN-NJQgNscjJR9aHVD7It2tBbQFDg";
+const API_KEY = import.meta.env.VITE_TMBD_ACCESS_TOKEN;
 
 const API_OPTION = {
   method: "GET",
@@ -24,9 +24,15 @@ function App() {
   const [errorMessage, setErrorMessage] = useState("");
   const [movieList, setMovieList] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [trendingMovies, setTrendingMovies] = useState([]);
 
-  useDebounce(() => setDebouncedSearchTerm, 500, [searchTerm]);
+  useDebounce(() => setDebouncedSearchTerm(searchTerm), 1000, [searchTerm]);
+
+  const loadTrendingMovies =  async() => {
+      const movies = await getTrendingMovies();
+      setTrendingMovies(movies);
+  }
 
   const fetchData = async (query = "") => {
     try {
@@ -45,6 +51,9 @@ function App() {
 
       const data = await response.json();
       setMovieList(data.results || []);
+      if (query && data.results.length > 0) {
+        updateSearchCount(query, data.results[0]);
+      }
     } catch (err) {
       setErrorMessage(err.message || "Unable to fetch data");
       setMovieList([]);
@@ -54,8 +63,12 @@ function App() {
   };
 
   useEffect(() => {
-    fetchData(searchTerm);
-  }, [searchTerm]);
+    fetchData(debouncedSearchTerm);
+  }, [debouncedSearchTerm]);
+
+  useEffect(() => {
+    loadTrendingMovies();
+  }, [])
 
   return (
     <>
